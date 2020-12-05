@@ -2,19 +2,31 @@ package org.polytech.Controller;
 
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Pair;
 import org.polytech.Model.Cube;
+
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
+
+import org.polytech.Utility.Utility;
 
 public class PrimaryWindowController {
-    private Cube cube = new Cube(3);
+    private Cube cube = new Cube();
     private ArrayList<Color> colors;
     ArrayList<GridPane> gridPanesList;
+    StringBuilder commandsSb;
+    ArrayDeque<String> executedComms;
+    private boolean settingMode;
+
+    private int iterations = 0;
 
     @FXML
     private GridPane frontPane;
@@ -30,11 +42,16 @@ public class PrimaryWindowController {
     private GridPane backPane;
 
     @FXML
-    private Label commandsLabel;
+    private TextArea commandsLabel;
+
+    @FXML
+    private Group buttonsLeftGroup;
+
+    @FXML
+    private Group buttonsRightGroup;
 
     @FXML
     private void initialize() {
-        //cube.showTheStatus();
 
         colors = new ArrayList<>();
         colors.add(Color.rgb(0, 255, 21));
@@ -52,12 +69,14 @@ public class PrimaryWindowController {
         gridPanesList.add(upPane);
         gridPanesList.add(downPane);
 
-        //((Rectangle)gridPanesList.get(3).getChildren().get(8)).setFill(colors.get(0));
+        cube.reset();
+        executeTurns();
 
+        settingMode = true;
 
         gridPanesList.forEach(pane ->
             pane.getChildren().forEach(item -> item.setOnMouseClicked(mouseEvent -> {
-                if (item instanceof Rectangle) {
+                if (item instanceof Rectangle && settingMode) {
                     /* Получаем координаты выбранной ячейки (или границы)*/
                     Node source = (Node) mouseEvent.getSource();
                     Integer cI = GridPane.getColumnIndex(source);
@@ -69,77 +88,119 @@ public class PrimaryWindowController {
                     Color fill = (Color)((Rectangle)item).getFill();
                     int colorIndex = (colors.indexOf(fill) == 5) ? 0 : colors.indexOf(fill) + 1;
 
-                    ((Rectangle)item).setFill(colors.get(colorIndex));
-                    cube.setSquare(gridPanesList.indexOf(pane), coords.getKey(), coords.getValue(), colorIndex);
+                    //((Rectangle)item).setFill(colors.get(colorIndex));
+
+                    int cubieX;
+                    int cubieY;
+                    int cubieZ;
+
+                    switch (gridPanesList.indexOf(pane)) {
+                        case 0:
+                            cubieY = 0;
+                            cubieZ = coords.getKey();
+                            cubieX = coords.getValue();
+                            break;
+                        case 1:
+                            cubieY = coords.getValue();
+                            cubieZ = coords.getKey();
+                            cubieX = 2;
+                            break;
+                        case 2:
+                            cubieY = 2;
+                            cubieZ = coords.getKey();
+                            cubieX = 2 - coords.getValue();
+                            break;
+                        case 3:
+                            cubieY = 2 - coords.getValue();
+                            cubieZ = coords.getKey();
+                            cubieX = 0;
+                            break;
+                        case 4:
+                            cubieY = 2 - coords.getKey();
+                            cubieZ = 0;
+                            cubieX = coords.getValue();
+                            break;
+                        default:
+                            cubieY = coords.getKey();
+                            cubieZ = 2;
+                            cubieX = coords.getValue();
+                    }
+
+                    cube.setCubieColor(cubieX, cubieY, cubieZ,
+                            Utility.getDirOfSide(gridPanesList.indexOf(pane)), Utility.getColorOfInt(colorIndex));
+
+                    executeTurns();
+
+                    System.out.println(cubieX + " " + cubieY + " " + cubieZ + " "
+                            + Utility.getDirOfSide(gridPanesList.indexOf(pane)) + " " + Utility.getColorOfInt(colorIndex));
                 }
-                else
-                    commandsLabel.setText("не ректангл");
         })));
     }
 
     @FXML
     private void handleFrontClockwise() {
-        turn(0, 2, 0);
+        turn("F");
     }
 
     @FXML
     private void handleFrontCounterclockwise() {
-        turn(0, 2, 1);
+        turn("F'");
     }
 
     @FXML
     private void handleRightClockwise() {
-        turn(1, 2, 0);
+        turn("R");
     }
 
     @FXML
     private void handleRightCounterclockwise() {
-        turn(1, 2, 1);
+        turn("R'");
     }
 
     @FXML
     private void handleBackClockwise() {
-        turn(0, 0, 1);
+        turn("B");
     }
 
     @FXML
     private void handleBackCounterclockwise() {
-        turn(0, 0, 0);
+        turn("B'");
     }
 
     @FXML
     private void handleLeftClockwise() {
-        turn(1, 0, 1);
+        turn("L");
     }
 
     @FXML
     private void handleLeftCounterclockwise() {
-        turn(1, 0, 0);
+        turn("L'");
     }
 
     @FXML
     private void handleUpClockwise() {
-        turn(2, 2, 0);
+        turn("U");
     }
 
     @FXML
     private void handleUpCounterclockwise() {
-        turn(2, 2, 1);
+        turn("U'");
     }
 
     @FXML
     private void handleDownClockwise() {
-        turn(2, 0, 1);
+        turn("D");
     }
 
     @FXML
     private void handleDownCounterclockwise() {
-        turn(2, 0, 0);
+        turn("D'");
     }
 
     @FXML
     private void handleShuffle() {
-        cube.setRandomState();
+        cube.reset();
+        cube.randScramble();
         executeTurns();
     }
 
@@ -149,8 +210,126 @@ public class PrimaryWindowController {
         executeTurns();
     }
 
-    private void turn(int axis, int layer, int direction) {
-        cube.turnSides(axis, layer, direction);
+    @FXML
+    private void handleSolve() {
+        char[][][] state = cube.getColors();
+        solve();
+        cube.setAllColors(state);
+    }
+
+    private void solve() {
+        char[][][] state = cube.getColors();
+        if (cube.solved()) {
+            commandsLabel.setText("Already solved");
+            return;
+        }
+
+        commandsSb = new StringBuilder();
+        executedComms = new ArrayDeque<>();
+
+        String currCommand = cube.optimizeMoves(cube.makeSunflower());
+        if (checkIfFailed(currCommand, state)) return;
+        commandsSb.append(currCommand);
+
+        currCommand = cube.optimizeMoves(cube.makeWhiteCross());
+        if (checkIfFailed(currCommand, state)) return;
+        commandsSb.append(currCommand);
+
+        currCommand = cube.optimizeMoves(cube.finishWhiteLayer());
+        if (checkIfFailed(currCommand, state)) return;
+        commandsSb.append(currCommand);
+
+        currCommand = cube.optimizeMoves(cube.insertAllEdges());
+        if (checkIfFailed(currCommand, state)) return;
+        commandsSb.append(currCommand);
+
+        currCommand = cube.optimizeMoves(cube.makeYellowCross());
+        if (checkIfFailed(currCommand, state)) return;
+        commandsSb.append(currCommand);
+
+        currCommand = cube.optimizeMoves(cube.orientLastLayer());
+        if (checkIfFailed(currCommand, state)) return;
+        commandsSb.append(currCommand);
+
+        String PLL = cube.permuteLastLayer();
+
+        if (PLL.equals("failed")) {
+            if (iterations < 50) {
+                iterations++;
+                cube.setAllColors(state);
+                solve();
+            } else {
+                System.out.println("=================\nSOLVING FAILED=================");
+                iterations = 0;
+                checkIfFailed(PLL, state);
+            }
+        } else {
+            currCommand = cube.optimizeMoves(PLL);
+            commandsSb.append(currCommand);
+
+            // оптимизация на стыке этапов сборки
+            commandsSb = new StringBuilder(cube.optimizeMoves(commandsSb.toString().trim()) + " ");
+            commandsLabel.setText(commandsSb.toString());
+            System.out.println("SUCCESSFUL");
+            iterations = 0;
+
+            settingMode = false;
+            buttonsLeftGroup.setDisable(true);
+            buttonsRightGroup.setDisable(false);
+        }
+    }
+
+    @FXML
+    private void handleNext() {
+        if (commandsSb == null || commandsSb.length() == 0) return;
+        int endCommandIndex = commandsSb.indexOf(" ");
+        cube.performMoves(commandsSb.substring(0, endCommandIndex));
+
+        executeTurns();
+        System.out.println(commandsSb.substring(0, endCommandIndex));
+
+        executedComms.add(commandsSb.substring(0, endCommandIndex));
+        commandsSb.delete(0, endCommandIndex+1);
+        commandsLabel.setText(commandsSb.toString());
+    }
+
+    @FXML
+    private void handlePrevious() {
+        if (executedComms.size() == 0) return;
+        String currCom = executedComms.removeLast();
+
+        cube.performReverseMoves(currCom);
+        executeTurns();
+
+        commandsSb.insert(0, currCom + " ");
+        commandsLabel.setText(commandsSb.toString());
+
+        int endCommandIndex = commandsSb.indexOf(" ");
+        System.out.println(commandsSb.substring(0, endCommandIndex));
+    }
+
+    @FXML
+    private void handleNew() {
+        cube.reset();
+        executeTurns();
+        settingMode = true;
+        buttonsLeftGroup.setDisable(false);
+        buttonsRightGroup.setDisable(true);
+        commandsLabel.clear();
+    }
+
+    private boolean checkIfFailed(String currCommand, char[][][] state) {
+        if (currCommand.equals("failed")) {
+            commandsLabel.setText("IMPOSSIBLE TO SOLVE");
+            cube.setAllColors(state);
+            executeTurns();
+            return true;
+        }
+        return false;
+    }
+
+    private void turn(String turn) {
+        cube.turn(turn);
         executeTurns();
     }
 
@@ -167,20 +346,33 @@ public class PrimaryWindowController {
     }
 
     private ArrayList<ArrayList<Color>> arrayOfNeededColors() {
+        char[][][] charPaneColors = cube.getColors();
         ArrayList<ArrayList<Color>> paneColors = new ArrayList<>();
-
         for (int i = 0; i < 6; i++) {
-            int[][] currentSide = cube.getTheSide(i);
             paneColors.add(new ArrayList<>());
             for (int j = 0; j < 3; j++) {
                 for (int k = 0; k < 3; k++) {
-                    paneColors.get(i).add(colors.get(currentSide[j][k]));
-                    System.out.print(currentSide[j][k] + " ");
+                    paneColors.get(i).add(colors.get(Utility.getColorOfChar(charPaneColors[i][j][k])));
+                    //System.out.print(Utility.getColorOfChar(charPaneColors[i][j][k]) + " ");
                 }
-                System.out.println('\n');
+                //System.out.println('\n');
             }
         }
         return paneColors;
     }
+
+    private void printStateInConsole() {
+        char[][][] cols = cube.getColors();
+        for(int i = 0; i < 6; i++) {
+            for(int j = 0; j < 3; j++) {
+                for (int k = 0; k < 3; k++) {
+                    System.out.print(cols[i][j][k] + " ");
+                }
+                System.out.println();
+            }
+            System.out.println();
+        }
+    }
+
 
 }
