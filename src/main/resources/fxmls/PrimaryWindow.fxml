@@ -168,7 +168,7 @@
             <Button layoutX="79.0" layoutY="77.0" mnemonicParsing="false" onAction="#handleReset" prefHeight="25.0" prefWidth="50.0" text="Reset" />
          </children>
       </Group>
-      <Button layoutX="548.0" layoutY="18.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="30.0" text="?" />
+      <Button layoutX="548.0" layoutY="18.0" mnemonicParsing="false" onAction="#handleHelp" prefHeight="25.0" prefWidth="30.0" text="?" />
       <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ffffff00" height="249.0" layoutX="342.0" layoutY="135.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="4.0" width="345.0" />
       <Group fx:id="buttonsRightGroup" disable="true" layoutX="379.0" layoutY="338.0">
          <children>

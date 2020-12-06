@@ -4,26 +4,30 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Pair;
+import org.polytech.Main;
 import org.polytech.Model.Cube;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.polytech.Utility.Utility;
 
 public class PrimaryWindowController {
-    private Cube cube = new Cube();
+    private Main mainApp;
+
+    private final Cube cube = new Cube();
     private ArrayList<Color> colors;
     ArrayList<GridPane> gridPanesList;
+    // команды для выполнения
     StringBuilder commandsSb;
+    // выполненные команды
     ArrayDeque<String> executedComms;
+    // установка состояния (true) или выполнение последовательности команд для решения (false)
     private boolean settingMode;
 
     private int iterations = 0;
@@ -208,17 +212,18 @@ public class PrimaryWindowController {
     private void handleReset() {
         cube.reset();
         executeTurns();
+        commandsLabel.clear();
     }
 
     @FXML
     private void handleSolve() {
-        char[][][] state = cube.getColors();
+        char[][][] state = cube.getTheState();
         solve();
-        cube.setAllColors(state);
+        cube.setTheState(state);
     }
 
     private void solve() {
-        char[][][] state = cube.getColors();
+        char[][][] state = cube.getTheState();
         if (cube.solved()) {
             commandsLabel.setText("Already solved");
             return;
@@ -256,7 +261,7 @@ public class PrimaryWindowController {
         if (PLL.equals("failed")) {
             if (iterations < 50) {
                 iterations++;
-                cube.setAllColors(state);
+                cube.setTheState(state);
                 solve();
             } else {
                 System.out.println("=================\nSOLVING FAILED=================");
@@ -318,10 +323,19 @@ public class PrimaryWindowController {
         commandsLabel.clear();
     }
 
+    @FXML
+    private void handleHelp() {
+        mainApp.showHelp();
+    }
+
+    public void setMainApp(Main MainApp) {
+        this.mainApp = MainApp;
+    }
+
     private boolean checkIfFailed(String currCommand, char[][][] state) {
         if (currCommand.equals("failed")) {
             commandsLabel.setText("IMPOSSIBLE TO SOLVE");
-            cube.setAllColors(state);
+            cube.setTheState(state);
             executeTurns();
             return true;
         }
@@ -346,7 +360,7 @@ public class PrimaryWindowController {
     }
 
     private ArrayList<ArrayList<Color>> arrayOfNeededColors() {
-        char[][][] charPaneColors = cube.getColors();
+        char[][][] charPaneColors = cube.getTheState();
         ArrayList<ArrayList<Color>> paneColors = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
             paneColors.add(new ArrayList<>());
@@ -362,7 +376,7 @@ public class PrimaryWindowController {
     }
 
     private void printStateInConsole() {
-        char[][][] cols = cube.getColors();
+        char[][][] cols = cube.getTheState();
         for(int i = 0; i < 6; i++) {
             for(int j = 0; j < 3; j++) {
                 for (int k = 0; k < 3; k++) {
@@ -373,6 +387,4 @@ public class PrimaryWindowController {
             System.out.println();
         }
     }
-
-
 }
