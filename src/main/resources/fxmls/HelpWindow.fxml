@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.polytech.Controller.HelpWindowController">
+   <children>
+      <TextArea layoutX="15.0" layoutY="68.0" prefHeight="317.0" prefWidth="570.0" text="Вращение каждой из 6 граней кубика обозначено отдельной буквой:&#10;F (Front) - передняя&#10;B (Back) - задняя&#10;R (Right) - правая&#10;L (Left) - левая&#10;U (Up) - верхняя&#10;D (Down) - нижняя&#10;Каждое из этих действий вращает указанную грань по часовой&#10;стрелке. Если у буквы есть апостроф ( например, U' ), это значит, что &#10;вращение происходит против часовой стрелки. &#10;&#10;Также используется обозначение y, при котором весь кубик поворачивается&#10;так, что правая грань становится передней, передняя левой, левая задней, а&#10;задняя правой. Верхняя и нижняя местами не меняются. y' - то же, но в &#10;противоположную сторону">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </TextArea>
+      <Label layoutX="158.0" layoutY="14.0" prefHeight="40.0" prefWidth="280.0" text="Обозначения команд">
+         <font>
+            <Font size="28.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>
