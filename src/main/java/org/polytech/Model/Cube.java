@@ -555,7 +555,7 @@ public class Cube {
     /**
      * Генерация рандомного состояния кубика (решаемого)
      */
-    public void randScramble() {
+    public String randScramble() {
         StringBuilder scramble = new StringBuilder();
         char[] possMoves = new char[] {'U', 'D', 'R', 'L', 'F', 'B'}; // Разрешенные повороты
         char prevMove = possMoves[(int)(Math.random()*6)];
@@ -578,6 +578,8 @@ public class Cube {
             }
         }
         scramble(scramble.toString());
+
+        return scramble.toString();
     }
 
     private void scramble(String scramble) {
@@ -809,7 +811,7 @@ public class Cube {
     }
 
     /**
-     * показывает, есть ли белые углы в верхнем слое
+     * Проверяет, есть ли белые углы в верхнем слое
      */
     public boolean whiteCornerInU() {
         for(int i = 0; i<3; i++) {
@@ -847,27 +849,28 @@ public class Cube {
                     y=0; x=0;
 
                     int numUTurns = 0;
-                    int yRotations = 0;
+                    int numyRotations = 0;
                     int iterations = 0;
                     while(!whiteCornerPrepared()) {
-
-                        if(iterations > 100)
+                        if(iterations > 5)
                             return "failed";
                         iterations++;
 
-                        performMoves("U y'"); numUTurns++; yRotations++;
-
+                        performMoves("U y'");
+                        numUTurns++;
+                        numyRotations++;
                     }
-                    uAndyTurns(moves, numUTurns, yRotations);
+                    uAndyTurns(moves, numUTurns, numyRotations);
 
                     int numRuruMoves = 0;
-                    while(!cornerInserted(2, 0, 2)){
-
-                        if(iterations > 100)
+                    iterations = 0;
+                    while(!cornerInserted(2, 0, 2)) {
+                        if(iterations > 7)
                             return "failed";
                         iterations++;
 
-                        performMoves("R U R' U'"); numRuruMoves++;
+                        performMoves("R U R' U'");
+                        numRuruMoves++;
                     }
                     if(numRuruMoves == 5) {
                         moves.append("U R U' R' ");
@@ -880,12 +883,11 @@ public class Cube {
                 }
             }
         }
-
         return moves.toString();
     }
 
     /**
-     * Утилита для insertWhiteCorners() и insertEdgesInU(), совершает нужное число U и y поворотов
+     * Утилита для insertWhiteCorners() и insertEdgesInU(), добавляет в moves нужное число U и y поворотов
      */
     private void uAndyTurns(StringBuilder moves, int numUTurns, int yRotations) {
         if(numUTurns == 1) {
@@ -909,7 +911,7 @@ public class Cube {
      */
     public String insertMisorientedCorners() {
         StringBuilder moves = new StringBuilder();
-        for(int i = 0; i<4; i++) {
+        for(int i = 0; i < 4; i++) {
             moves.append(performMoves("y "));
             if(!cornerInserted(2,0,2)) {
                 if(cubiePos[2][0][2].isWhiteCorner()) {
@@ -918,7 +920,8 @@ public class Cube {
                         String currComm = insertWhiteCorners();
                         if (currComm.equals("failed"))
                             return "failed";
-                        moves.append(insertWhiteCorners());
+                        moves.append(currComm);
+                        i = -1;
                     }
                 }
             }
@@ -1068,6 +1071,7 @@ public class Cube {
                 else {
                     moves.append(performMoves("R U R' U' F' U' F "));
                     moves.append(insertEdgesInU());
+                    i = -1;
                 }
             }
         }
@@ -1186,7 +1190,7 @@ public class Cube {
             if(numOriented == 0){
                 int iterations = 0;
                 while(cubiePos[0][0][0].getDirOfColor('Y') != 'L') {
-                    if (iterations < 100) {
+                    if (iterations < 5) {
                         iterations++;
                     } else {
                         return "failed";
@@ -1199,7 +1203,7 @@ public class Cube {
             else if(numOriented == 1){
                 int iterations = 0;
                 while(cubiePos[0][0][0].getDirOfColor('Y') != 'U') {
-                    if (iterations < 100) {
+                    if (iterations < 5) {
                         iterations++;
                     } else {
                         return "failed";
@@ -1212,7 +1216,7 @@ public class Cube {
             else if(numOriented == 2){
                 int iterations = 0;
                 while(cubiePos[0][0][0].getDirOfColor('Y') != 'F') {
-                    if (iterations < 100) {
+                    if (iterations < 5) {
                         iterations++;
                     } else {
                         return "failed";

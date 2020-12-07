@@ -30,7 +30,6 @@ public class PrimaryWindowController {
     // установка состояния (true) или выполнение последовательности команд для решения (false)
     private boolean settingMode;
 
-    private int iterations = 0;
 
     @FXML
     private GridPane frontPane;
@@ -202,10 +201,11 @@ public class PrimaryWindowController {
     }
 
     @FXML
-    private void handleShuffle() {
+    private String handleShuffle() {
         cube.reset();
-        cube.randScramble();
+        String scramble = cube.randScramble();
         executeTurns();
+        return scramble;
     }
 
     @FXML
@@ -252,22 +252,19 @@ public class PrimaryWindowController {
         if (checkIfFailed(currCommand, state)) return;
         commandsSb.append(currCommand);
 
+
         currCommand = cube.optimizeMoves(cube.orientLastLayer());
         if (checkIfFailed(currCommand, state)) return;
         commandsSb.append(currCommand);
 
+        executeTurns();
+
         String PLL = cube.permuteLastLayer();
 
         if (PLL.equals("failed")) {
-            if (iterations < 50) {
-                iterations++;
-                cube.setTheState(state);
-                solve();
-            } else {
+
                 System.out.println("=================\nSOLVING FAILED=================");
-                iterations = 0;
                 checkIfFailed(PLL, state);
-            }
         } else {
             currCommand = cube.optimizeMoves(PLL);
             commandsSb.append(currCommand);
@@ -276,7 +273,8 @@ public class PrimaryWindowController {
             commandsSb = new StringBuilder(cube.optimizeMoves(commandsSb.toString().trim()) + " ");
             commandsLabel.setText(commandsSb.toString());
             System.out.println("SUCCESSFUL");
-            iterations = 0;
+
+            executeTurns();
 
             settingMode = false;
             buttonsLeftGroup.setDisable(true);
