@@ -7,14 +7,11 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.polytech.Controller.PrimaryWindowController;
-import org.polytech.Model.Cube;
 
 import java.io.IOException;
 
 public class Main extends Application {
     private Stage primaryStage;
-    private AnchorPane farmField;
-    //private Cube cube = new Cube(3);
 
     public Main() {
     }
@@ -32,11 +29,11 @@ public class Main extends Application {
     public void showMainWindow() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxmls/PrimaryWindow.fxml"));
-            farmField = loader.load();
+            AnchorPane mainWindow = loader.load();
             PrimaryWindowController controller = loader.getController();
             controller.setMainApp(this);
 
-            Scene scene = new Scene(farmField);
+            Scene scene = new Scene(mainWindow);
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch (IOException e) {
