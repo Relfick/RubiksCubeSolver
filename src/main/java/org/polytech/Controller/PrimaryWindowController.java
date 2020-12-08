@@ -30,7 +30,6 @@ public class PrimaryWindowController {
     // установка состояния (true) или выполнение последовательности команд для решения (false)
     private boolean settingMode;
 
-
     @FXML
     private GridPane frontPane;
     @FXML
@@ -217,69 +216,26 @@ public class PrimaryWindowController {
 
     @FXML
     private void handleSolve() {
-        char[][][] state = cube.getTheState();
-        solve();
-        cube.setTheState(state);
-    }
-
-    private void solve() {
-        char[][][] state = cube.getTheState();
         if (cube.solved()) {
             commandsLabel.setText("Already solved");
             return;
         }
 
-        commandsSb = new StringBuilder();
+        char[][][] state = cube.getTheState();
+        commandsSb = new StringBuilder(cube.solve());
         executedComms = new ArrayDeque<>();
 
-        String currCommand = cube.optimizeMoves(cube.makeSunflower());
-        if (checkIfFailed(currCommand, state)) return;
-        commandsSb.append(currCommand);
-
-        currCommand = cube.optimizeMoves(cube.makeWhiteCross());
-        if (checkIfFailed(currCommand, state)) return;
-        commandsSb.append(currCommand);
-
-        currCommand = cube.optimizeMoves(cube.finishWhiteLayer());
-        if (checkIfFailed(currCommand, state)) return;
-        commandsSb.append(currCommand);
-
-        currCommand = cube.optimizeMoves(cube.insertAllEdges());
-        if (checkIfFailed(currCommand, state)) return;
-        commandsSb.append(currCommand);
-
-        currCommand = cube.optimizeMoves(cube.makeYellowCross());
-        if (checkIfFailed(currCommand, state)) return;
-        commandsSb.append(currCommand);
-
-
-        currCommand = cube.optimizeMoves(cube.orientLastLayer());
-        if (checkIfFailed(currCommand, state)) return;
-        commandsSb.append(currCommand);
-
-        executeTurns();
-
-        String PLL = cube.permuteLastLayer();
-
-        if (PLL.equals("failed")) {
-
-                System.out.println("=================\nSOLVING FAILED=================");
-                checkIfFailed(PLL, state);
+        if (commandsSb.toString().equals("failed")) {
+            commandsLabel.setText("IMPOSSIBLE TO SOLVE");
         } else {
-            currCommand = cube.optimizeMoves(PLL);
-            commandsSb.append(currCommand);
-
-            // оптимизация на стыке этапов сборки
-            commandsSb = new StringBuilder(cube.optimizeMoves(commandsSb.toString().trim()) + " ");
             commandsLabel.setText(commandsSb.toString());
-            System.out.println("SUCCESSFUL");
-
-            executeTurns();
-
             settingMode = false;
             buttonsLeftGroup.setDisable(true);
             buttonsRightGroup.setDisable(false);
         }
+
+        cube.setTheState(state);
+        executeTurns();
     }
 
     @FXML
@@ -323,21 +279,11 @@ public class PrimaryWindowController {
 
     @FXML
     private void handleHelp() {
-        mainApp.showHelp();
+         mainApp.showHelp();
     }
 
     public void setMainApp(Main MainApp) {
         this.mainApp = MainApp;
-    }
-
-    private boolean checkIfFailed(String currCommand, char[][][] state) {
-        if (currCommand.equals("failed")) {
-            commandsLabel.setText("IMPOSSIBLE TO SOLVE");
-            cube.setTheState(state);
-            executeTurns();
-            return true;
-        }
-        return false;
     }
 
     private void turn(String turn) {
@@ -373,6 +319,9 @@ public class PrimaryWindowController {
         return paneColors;
     }
 
+    /**
+     * Для тестирования
+     */
     private void printStateInConsole() {
         char[][][] cols = cube.getTheState();
         for(int i = 0; i < 6; i++) {

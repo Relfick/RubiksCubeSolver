@@ -829,6 +829,7 @@ public class Cube {
      * Вставляет белые углы на нижний слой
      */
     public String insertWhiteCorners() {
+        int iterations2 = 0;
         StringBuilder moves = new StringBuilder();
         for(int y = 0; y<3; y++) {
             for(int x = 0; x<3; x++) {
@@ -881,6 +882,9 @@ public class Cube {
                         }
                     }
                 }
+                if(iterations2 > 100)
+                    return "failed";
+                iterations2++;
             }
         }
         return moves.toString();
@@ -1314,6 +1318,44 @@ public class Cube {
             return "failed";
 
         return optimizeMoves(moves.toString());
+    }
+
+    public String solve() {
+        StringBuilder commandsSb = new StringBuilder();
+
+        String currCommand = optimizeMoves(makeSunflower());
+        if (checkIfFailed(currCommand)) return "failed";
+        commandsSb.append(currCommand);
+
+        currCommand = optimizeMoves(makeWhiteCross());
+        if (checkIfFailed(currCommand)) return "failed";
+        commandsSb.append(currCommand);
+
+        currCommand = optimizeMoves(finishWhiteLayer());
+        if (checkIfFailed(currCommand)) return "failed";
+        commandsSb.append(currCommand);
+
+        currCommand = optimizeMoves(insertAllEdges());
+        if (checkIfFailed(currCommand)) return "failed";
+        commandsSb.append(currCommand);
+
+        currCommand = optimizeMoves(makeYellowCross());
+        if (checkIfFailed(currCommand)) return "failed";
+        commandsSb.append(currCommand);
+
+        currCommand = optimizeMoves(orientLastLayer());
+        if (checkIfFailed(currCommand)) return "failed";
+        commandsSb.append(currCommand);
+
+        currCommand = optimizeMoves(permuteLastLayer());
+        if (checkIfFailed(currCommand)) return "failed";
+        commandsSb.append(currCommand);
+
+        return optimizeMoves(commandsSb.toString().trim()) + " ";
+    }
+
+    private boolean checkIfFailed(String currCommand) {
+        return currCommand.equals("failed");
     }
 
     /**
