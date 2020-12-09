@@ -9,6 +9,20 @@ javafx {
     modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 
+jar {
+    manifest {
+        attributes "Main-Class": "org.polytech.Main"
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+application {
+    mainClassName = 'org.polytech.Main'
+}
+
 mainClassName = 'org.polytech.Main'
 group 'org.polytech'
 version '1.0-SNAPSHOT'

@@ -10,6 +10,24 @@ import org.polytech.Controller.PrimaryWindowController;
 
 import java.io.IOException;
 
+/**
+ * Программа - решатель кубика рубика
+ * Вращение каждой из 6 граней кубика обозначено отдельной буквой:
+ * F (Front) - передняя
+ * B (Back) - задняя
+ * R (Right) - правая
+ * L (Left) - левая
+ * U (Up) - верхняя
+ * D (Down) - нижняя
+ * Каждое из этих действий вращает указанную грань по часовой
+ * стрелке. Если у буквы есть апостроф ( например, U' ), это значит, что
+ * вращение происходит против часовой стрелки.
+ *
+ * Также используется обозначение y, при котором весь кубик поворачивается
+ * так, что правая грань становится передней, передняя левой, левая задней, а
+ * задняя правой. Верхняя и нижняя местами не меняются. y' - то же, но в
+ * противоположную сторону
+ */
 public class Main extends Application {
     private Stage primaryStage;
 
@@ -29,11 +47,12 @@ public class Main extends Application {
     public void showMainWindow() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxmls/PrimaryWindow.fxml"));
-            AnchorPane mainWindow = loader.load();
+            System.out.println(getClass().getResource(""));
+            AnchorPane primaryWindow = loader.load();
             PrimaryWindowController controller = loader.getController();
             controller.setMainApp(this);
 
-            Scene scene = new Scene(mainWindow);
+            Scene scene = new Scene(primaryWindow);
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch (IOException e) {
