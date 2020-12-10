@@ -68,7 +68,6 @@ public class Cubie {
 
     /**
      * Для каждой грани не из второго слоя возвращает вертикальный слой, в котором этот кубик находится
-     * @return For any EdgeCubie that is NOT in the E Slice, returns the vertical slice that cubie belongs in
      */
     public char verticalFace(int x, int y) {
         if(edge) {
